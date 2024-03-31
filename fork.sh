@@ -96,6 +96,11 @@ if [ "$CREATE_FORKS" != "${CREATE_FORKS#[Yy]}" ] ;then
     printf 'Would you like to delete & recreate some selected repos if exists in github? (y/n)'
     read ASK_FOR_DELETE
 
+    if [ -z "$FORK_DEFAULT_BRANCH_ONLY" ]; then
+        printf 'Do you want to fork the default branch only (not recommended for bug fixes)? (y/n)'
+        read FORK_DEFAULT_BRANCH_ONLY
+    fi
+
     for BUNDLE in "${BUNDLES[@]}"; do
         if [ "$ASK_FOR_DELETE" != "${ASK_FOR_DELETE#[Yy]}" ] ;then
             printf "\n"
@@ -124,14 +129,25 @@ if [ "$CREATE_FORKS" != "${CREATE_FORKS#[Yy]}" ] ;then
             fi
         fi
 
-        curl -sL \
-            --output /dev/null \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_API_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/pimcore/$BUNDLE/forks \
-            -d '{"name":"pimcore-'$BUNDLE'","repo":"pimcore-'$BUNDLE'","owner":"'$GITHUB_USERNAME'","default_branch_only":true}'
+        if [ "$FORK_DEFAULT_BRANCH_ONLY" != "${FORK_DEFAULT_BRANCH_ONLY#[Yy]}" ] ;then
+            curl -sL \
+                --output /dev/null \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $GITHUB_API_TOKEN" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/pimcore/$BUNDLE/forks \
+                -d '{"name":"pimcore-'$BUNDLE'","repo":"pimcore-'$BUNDLE'","owner":"'$GITHUB_USERNAME'","default_branch_only":true}'
+        else
+            curl -sL \
+                --output /dev/null \
+                -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $GITHUB_API_TOKEN" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/pimcore/$BUNDLE/forks \
+                -d '{"name":"pimcore-'$BUNDLE'","repo":"pimcore-'$BUNDLE'","owner":"'$GITHUB_USERNAME'","default_branch_only":false}'
+        fi
 
         printf "$GITHUB_USERNAME/pimcore-$BUNDLE: Fork created (if not exist before).\n"
         sleep 1
@@ -141,7 +157,7 @@ if [ "$CREATE_FORKS" != "${CREATE_FORKS#[Yy]}" ] ;then
     sleep 30
 fi
 
-printf 'Cloning repositories into "'`pwd`'/bundles/"...\n'
+printf "Cloning repositories into \"$PIMCORE_ROOT/bundles/\"...\n"
 
 if ! [[ -e "bundles/" ]]; then
     mkdir bundles/
