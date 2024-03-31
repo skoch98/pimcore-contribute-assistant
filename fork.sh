@@ -1,9 +1,5 @@
 #!/bin/bash
 
-if [ -f "pimcore-contribute-assistant.env" ]; then
-    source pimcore-contribute-assistant.env
-fi
-
 BUNDLES=(
     "pimcore"
     "admin-ui-classic-bundle"
@@ -16,6 +12,17 @@ BUNDLES=(
     "file-explorer-bundle"
     "pimcore-docs"
 )
+
+if [ -f "pimcore-contribute-assistant.env" ]; then
+    source pimcore-contribute-assistant.env
+fi
+
+if [ -z "$PIMCORE_ROOT" ]; then
+    printf 'Enter the absolute path to you pimcore root folder (e.g. "/var/www/html/"): '
+    read PIMCORE_ROOT
+fi
+
+cd $PIMCORE_ROOT
 
 if [ -z "$BUNDLE_BLOCKLIST" ]; then
     BUNDLE_BLOCKLIST="(docker|skeleton|demo|github|example|payment|elasticsearch|search-query-parser|personalized-product-search|number-sequence-generator|test-|s3-pit)"
