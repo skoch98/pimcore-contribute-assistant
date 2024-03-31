@@ -42,9 +42,9 @@ if [ -z "$COMPOSER_EXECUTOR" ]; then
     read COMPOSER_EXECUTOR
 fi
 
-printf 'Do you want to fetch all pimcore repositories (a) or preferred (p)? '
+printf 'Do you want to fetch all pimcore repositories from github (a) or preferred offline list (p)? '
 read FETCH_REPOSITORIES
-    
+
 if [ "$FETCH_REPOSITORIES" != "${FETCH_REPOSITORIES#[Aa]}" ] ;then
     if [ -z "$GITHUB_API_TOKEN" ]; then
         printf 'Enter you github api token (access to: repo, delete_repo)? '
@@ -106,7 +106,7 @@ if [ "$CREATE_FORKS" != "${CREATE_FORKS#[Yy]}" ] ;then
             printf "\n"
             printf $GITHUB_USERNAME'/pimcore-'$BUNDLE': Would you like to delete this repo if it exists (enter fullname to delete, press enter to skip)? '
             read SHOULD_DELETE_REPO
-            
+
             if [ "$SHOULD_DELETE_REPO" = "$GITHUB_USERNAME/pimcore-$BUNDLE" ]; then
                 if [ -z "$GITHUB_API_TOKEN" ]; then
                     printf 'Enter you github api token (access to: repo, delete_repo)? '
@@ -167,11 +167,11 @@ COMPOSER_REPOSITORIES="\"repositories\":["
 
 for BUNDLE in "${BUNDLES[@]}"; do
     if ! [[ -e "bundles/$BUNDLE" ]]; then
-        git clone https://github.com/$GITHUB_USERNAME/pimcore-$BUNDLE.git bundles/$BUNDLE
+        git clone git@github.com:$GITHUB_USERNAME/pimcore-$BUNDLE.git bundles/$BUNDLE
     fi
 
     if ! [[ -e "bundles/$BUNDLE" ]]; then
-        git clone https://github.com/pimcore/$BUNDLE.git bundles/$BUNDLE
+        git clone git@github.com:pimcore/$BUNDLE.git bundles/$BUNDLE
         printf "$GITHUB_USERNAME/pimcore-$BUNDLE: Could not found as fork. Instead a clone from pimcore will use.\n"
     else
         printf "$GITHUB_USERNAME/pimcore-$BUNDLE: Clone created.\n"
@@ -202,7 +202,7 @@ for BUNDLE in "${BUNDLES[@]}"; do
     printf "\n"
     printf $GITHUB_USERNAME'/pimcore-'$BUNDLE': Would you like to req this by composer (y/n)? '
     read REQ_BY_COMPOSER
-    
+
     if [ "$REQ_BY_COMPOSER" != "${REQ_BY_COMPOSER#[Yy]}" ] ;then
         if ! grep -F '"pimcore/'$BUNDLE'"' bundles/$BUNDLE/composer.json; then
             BUNDLE="$BUNDLE-bundle"
